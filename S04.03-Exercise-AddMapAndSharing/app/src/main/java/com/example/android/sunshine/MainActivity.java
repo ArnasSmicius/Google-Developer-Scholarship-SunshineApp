@@ -221,8 +221,24 @@ public class MainActivity extends AppCompatActivity implements ForecastAdapterOn
             return true;
         }
 
-        // TODO (2) Launch the map when the map menu item is clicked
+        // COMPLETE (2) Launch the map when the map menu item is clicked
+        if (id == R.id.action_map) {
+            openMap();
+            return true;
+        }
 
         return super.onOptionsItemSelected(item);
+    }
+
+    private void openMap() {
+        String location = "Vilnius, Lithuania";
+        Uri locationUri = Uri.parse("geo:0,0?q=" + location);
+        Intent intent = new Intent(Intent.ACTION_VIEW);
+        intent.setData(locationUri);
+        if(intent.resolveActivity(getPackageManager()) != null) {
+            startActivity(intent);
+        } else {
+            Log.d(TAG, "openMap: No location app installed!");
+        }
     }
 }
