@@ -15,20 +15,49 @@
  */
 package com.example.android.sunshine.sync;
 
+import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
+import android.database.Cursor;
+import android.net.Uri;
+import android.os.AsyncTask;
 import android.support.annotation.NonNull;
+
+import com.example.android.sunshine.data.WeatherContract;
 
 
 public class SunshineSyncUtils {
 
-//  TODO (1) Declare a private static boolean field called sInitialized
+//  COMPLETED (1) Declare a private static boolean field called sInitialized
+    private static boolean sInitialized;
 
-    //  TODO (2) Create a synchronized public static void method called initialize
-    //  TODO (3) Only execute this method body if sInitialized is false
-    //  TODO (4) If the method body is executed, set sInitialized to true
-    //  TODO (5) Check to see if our weather ContentProvider is empty
-        //  TODO (6) If it is empty or we have a null Cursor, sync the weather now!
+    //  COMPLETED (2) Create a synchronized public static void method called initialize
+    synchronized public static void initialize(final Context context) {
+        //  COMPLETED (3) Only execute this method body if sInitialized is false
+        if(sInitialized) return;
+        //  COMPLETED (4) If the method body is executed, set sInitialized to true
+        sInitialized = true;
+
+        new AsyncTask<Void, Void, Void>() {
+            @Override
+            protected Void doInBackground(Void... params) {
+                //  COMPLETED (5) Check to see if our weather ContentProvider is empty
+                Uri uri = WeatherContract.WeatherEntry.CONTENT_URI;
+
+                ContentResolver contentResolver = context.getContentResolver();
+                String[] projection = {WeatherContract.WeatherEntry._ID};
+                String selection = WeatherContract.WeatherEntry.getSqlSelectForTodayOnwards();
+
+                Cursor cursor = contentResolver.query(uri, projection, selection, null, null);
+
+                //  COMPLETED (6) If it is empty or we have a null Cursor, sync the weather now!
+                if(cursor.getCount() == 0 || cursor == null) {
+                    startImmediateSync(context);
+                }
+                return null;
+            }
+        }.execute();
+    }
 
     /**
      * Helper method to perform a sync immediately using an IntentService for asynchronous
